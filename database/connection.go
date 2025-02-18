@@ -17,20 +17,34 @@ func Connection() {
 	// dsn := "root:newpassword@tcp(127.0.0.1:3306)/userDB?charset=utf8mb4&parseTime=True&loc=Local"
 
 	// Load environment variables
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	dbCharset := os.Getenv("DB_CHARSET")
-	dbParseTime := os.Getenv("DB_PARSE_TIME")
-	dbLoc := os.Getenv("DB_LOC")
+	// dbUser := os.Getenv("DB_USER")
+	// dbPassword := os.Getenv("DB_PASSWORD")
+	// dbHost := os.Getenv("DB_HOST")
+	// dbPort := os.Getenv("DB_PORT")
+	// dbName := os.Getenv("DB_NAME")
+	// dbCharset := os.Getenv("DB_CHARSET")
+	// dbParseTime := os.Getenv("DB_PARSE_TIME")
+	// dbLoc := os.Getenv("DB_LOC")
 
-	// Build DSN (Data Source Name) dynamically
-	dsn := dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName +
-		"?charset=" + dbCharset + "&parseTime=" + dbParseTime + "&loc=" + dbLoc
+	// // Build DSN (Data Source Name) dynamically
+	// dsn := dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName +
+	// 	"?charset=" + dbCharset + "&parseTime=" + dbParseTime + "&loc=" + dbLoc
 
-	conDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// Load the .env file
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file", err)
+	// } else {
+	// 	fmt.Println(".env file loaded successfully")
+	// }
+
+	// // Get the DB_URL from environment variables
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL is not set in the .env file")
+	}
+
+	conDB, err := gorm.Open(mysql.Open(dbURL), &gorm.Config{})
 	if err != nil {
 		log.Fatal("error connecting to database", err)
 	}
