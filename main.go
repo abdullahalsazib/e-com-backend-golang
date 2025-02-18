@@ -17,7 +17,7 @@ func main() {
 	app := fiber.New()
 	// router
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173, https://e-com-backend-golang.onrender.com",
+		AllowOrigins:     "http://localhost:5173, https://e-com-fontend-react-tsx.vercel.app",
 		AllowCredentials: true,
 	}))
 
