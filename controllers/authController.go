@@ -43,72 +43,49 @@ func Register(c *fiber.Ctx) error {
 func Login(c *fiber.Ctx) error {
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request body",
-			"error":   err.Error(),
-		})
-	}
-
-	// Validate required fields
-	if data["email"] == "" || data["password"] == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Email and password are required",
-		})
+		return err
 	}
 
 	var user modles.User
 
-	// Check if user exists
-	result := database.DB.Where("email = ?", data["email"]).First(&user)
-	if result.Error != nil {
+	database.DB.Where("email = ?", data["email"]).First(&user)
+	if user.Id == 0 {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
 			"message": "User not found",
 		})
 	}
 
-	// Verify password
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		c.Status(fiber.StatusUnauthorized)
+		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
-			"message": "Invalid credentials",
+			"message": "Incorrect password",
 		})
 	}
 
-	// Generate JWT token
 	claim := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"issuer": strconv.Itoa(int(user.Id)),
 		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err := claim.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	token, err := claim.SignedString([]byte(secretKey))
 	if err != nil {
 		c.Status(fiber.StatusInternalServerError)
 		return c.JSON(fiber.Map{
-			"message": "Error generating token",
+			"message": "couldn't login",
 		})
 	}
 
-	// Set cookie
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
-		Secure:   true, // For HTTPS
-		SameSite: "strict",
 	}
 
 	c.Cookie(&cookie)
-
-	// Return user data along with success message
 	return c.JSON(fiber.Map{
-		"message": "Login successful",
-		"user": fiber.Map{
-			"id":    user.Id,
-			"name":  user.Name,
-			"email": user.Email,
-		},
+		"message": "Success",
 	})
 }
 
