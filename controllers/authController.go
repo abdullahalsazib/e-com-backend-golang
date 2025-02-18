@@ -43,49 +43,72 @@ func Register(c *fiber.Ctx) error {
 func Login(c *fiber.Ctx) error {
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
+	}
+
+	// Validate required fields
+	if data["email"] == "" || data["password"] == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Email and password are required",
+		})
 	}
 
 	var user modles.User
 
-	database.DB.Where("email = ?", data["email"]).First(&user)
-	if user.Id == 0 {
+	// Check if user exists
+	result := database.DB.Where("email = ?", data["email"]).First(&user)
+	if result.Error != nil {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
 			"message": "User not found",
 		})
 	}
 
+	// Verify password
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		c.Status(fiber.StatusBadRequest)
+		c.Status(fiber.StatusUnauthorized)
 		return c.JSON(fiber.Map{
-			"message": "Incorrect password",
+			"message": "Invalid credentials",
 		})
 	}
 
+	// Generate JWT token
 	claim := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"issuer": strconv.Itoa(int(user.Id)),
 		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err := claim.SignedString([]byte(secretKey))
+	token, err := claim.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if err != nil {
 		c.Status(fiber.StatusInternalServerError)
 		return c.JSON(fiber.Map{
-			"message": "couldn't login",
+			"message": "Error generating token",
 		})
 	}
 
+	// Set cookie
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
+		Secure:   true, // For HTTPS
+		SameSite: "strict",
 	}
 
 	c.Cookie(&cookie)
+
+	// Return user data along with success message
 	return c.JSON(fiber.Map{
-		"message": "Success",
+		"message": "Login successful",
+		"user": fiber.Map{
+			"id":    user.Id,
+			"name":  user.Name,
+			"email": user.Email,
+		},
 	})
 }
 
