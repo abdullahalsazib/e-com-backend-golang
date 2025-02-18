@@ -22,12 +22,21 @@ func Connection() {
 	}
 
 	// dsn := "root:newpassword@tcp(127.0.0.1:3306)/userDB?charset=utf8mb4&parseTime=True&loc=Local"
-	// Format DSN
-	dsn := os.Getenv("DATABASE_URL")
 
-	if dsn == "" {
-		log.Fatal("DATABASE_URL not set in environment variables")
-	}
+	// Load environment variables
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	dbCharset := os.Getenv("DB_CHARSET")
+	dbParseTime := os.Getenv("DB_PARSE_TIME")
+	dbLoc := os.Getenv("DB_LOC")
+
+	// Build DSN (Data Source Name) dynamically
+	dsn := dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName +
+		"?charset=" + dbCharset + "&parseTime=" + dbParseTime + "&loc=" + dbLoc
+
 	conDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("error connecting to database", err)
