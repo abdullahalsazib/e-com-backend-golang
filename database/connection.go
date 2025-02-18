@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"go-auth/modles"
 	"log"
 	"os"
@@ -22,21 +21,13 @@ func Connection() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// get database variables form .env file
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	dbCharset := os.Getenv("DB_CHARSET")
-	dbParseTime := os.Getenv("DB_PARSE_TIME")
-	dbLoc := os.Getenv("DB_LOC")
-
 	// dsn := "root:newpassword@tcp(127.0.0.1:3306)/userDB?charset=utf8mb4&parseTime=True&loc=Local"
 	// Format DSN
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s",
-		dbUser, dbPassword, dbHost, dbPort, dbName, dbCharset, dbParseTime, dbLoc,
-	)
+	dsn := os.Getenv("DATABASE_URL")
+
+	if dsn == "" {
+		log.Fatal("DATABASE_URL not set in environment variables")
+	}
 	conDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("error connecting to database", err)
