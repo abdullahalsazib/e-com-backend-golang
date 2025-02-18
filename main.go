@@ -19,7 +19,7 @@ func main() {
 	app := fiber.New()
 	// router
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173, https://your-frontend.vercel.app", // Allow local and deployed frontend
+		AllowOrigins:     "http://localhost:5173, https://e-com-fontend-react-tsx.vercel.app", // Allow local and deployed frontend
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,
