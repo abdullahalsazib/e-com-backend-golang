@@ -1,0 +1,9 @@
+{
+  "builds": [
+    {
+      "src": "server/main.go",
+      "use": "@vercel/go"
+    }
+  ],
+  "rootDirectory": "server"
+}
