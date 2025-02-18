@@ -29,7 +29,7 @@ func main() {
 	// Get PORT from Render Environment
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8000"
+		port = "8000" // Default port if not provided
 	}
 	log.Fatal(app.Listen(fmt.Sprintf(":%s", port)))
 }
