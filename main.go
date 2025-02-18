@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"go-auth/database"
 	"go-auth/routes"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -24,5 +26,10 @@ func main() {
 	// run the server
 	routes.Setup(app)
 	routes.SetupProductRoutes(app)
-	log.Fatal(app.Listen(":8000"))
+	// Get PORT from Render Environment
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", port)))
 }
