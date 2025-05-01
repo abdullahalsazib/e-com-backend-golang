@@ -31,22 +31,16 @@ func GetProductById(c *fiber.Ctx) error {
 func CreateProduct(c *fiber.Ctx) error {
 	var product modles.Product
 
-	// 👉 Request Body Print (Raw JSON দেখো)
 	body := c.Body()
 	fmt.Println("📩 Raw Request Body:", string(body))
 
-	// 👉 JSON Parse Test
 	if err := c.BodyParser(&product); err != nil {
-		fmt.Println("❌ Body Parsing Error:", err)
 		return c.Status(400).JSON(fiber.Map{"error": "Invalid request body", "details": err.Error()})
 	}
 
-	// 👉 Parsed Data Print
 	fmt.Println("✅ Parsed Product Data:", product)
 
-	// 👉 Database এ Insert করো
 	if err := database.DB.Create(&product).Error; err != nil {
-		fmt.Println("❌ Database Insert Error:", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to create product"})
 	}
 
